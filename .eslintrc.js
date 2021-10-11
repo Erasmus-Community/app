@@ -1,3 +1,4 @@
+/* eslint-disable */
 module.exports = {
     "env": {
         "browser": true
@@ -14,5 +15,6 @@ module.exports = {
         "vue"
     ],
     "rules": {
+        "no-unused-vars": "off"
     }
 };
