@@ -3,6 +3,7 @@ CREATE TABLE profiles (
     first_name text,
     last_name text,
     birth_date date,
+    country text,
 
     created_at timestamptz DEFAULT NOW(),
     updated_at timestamptz DEFAULT NOW(),
@@ -22,12 +23,15 @@ CREATE TABLE organizations (
     primary key (id)
 );
 
+CREATE TYPE project_status as ENUM('draft', 'accepting_applications', 'closed_applications', 'ended');
+
 CREATE TABLE projects (
     id uuid default uuid_generate_v4(),
     title text,
     description text,
     hosted_by uuid,
-    partner_orgs uuid[],    
+    partner_orgs uuid[],
+    status project_status,
 
     created_at timestamptz DEFAULT NOW(),
     updated_at timestamptz DEFAULT NOW(),
