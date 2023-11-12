@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { APP_HOME_URL } from "../../urls";
 import Input from "@/components/utils/Input/Input";
 import Button from "@/components/utils/Button/Button";
 
@@ -39,12 +38,7 @@ const LoginPage = () => {
 
   return (
     <div className="max-width my-10 flex justify-center">
-      <div className="my-5 w-11/12 rounded-lg border border-terciary-100 lg:w-7/12">
-        <div className="grid grid-cols-2 justify-around border-b border-terciary-100">
-          <div className="border-l border-terciary-100 p-3 text-center text-primary-500">
-            {/* {t("register")} */}
-          </div>
-        </div>
+      <div className="my-5 rounded-lg border border-terciary-100 lg:w-7/12">
         <div className="mt-9 px-10 py-5">
           <form onSubmit={() => {}}>
             <div className="mt-3">
@@ -61,7 +55,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 name="password"
-                labelText="password"
+                labelText="Password"
               ></Input>
             </div>
             <div className="my-5 w-full">

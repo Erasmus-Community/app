@@ -5,10 +5,6 @@ import { useState } from "react";
 import { NavbarItems } from "./config";
 import Link from "next/link";
 
-/*
- * missing config and links from the information
- */
-
 const Navbar = () => {
   const [mobileNavbarOpen, setMobileNavbarOpen] = useState<boolean>(false);
   const [profileDropdownOpen, setProfileDropdownOpen] =
