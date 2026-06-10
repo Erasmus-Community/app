@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Erasmus+ NGO Hub
 
-## Getting Started
+Platform for NGOs working on Erasmus+ projects: find partners for Key Action applications, recruit participants for approved projects (with urgent dropout replacement), and collaborate during ongoing projects.
 
-First, run the development server:
+Docs: [PRD](docs/PRD.md) · [Architecture & data model](docs/ARCHITECTURE.md)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Stack
+
+Rails 8.1 monolith · React 18 (esbuild via jsbundling-rails) · Tailwind CSS v4 (via cssbundling-rails) · PostgreSQL · session auth
+
+## Requirements
+
+- Ruby 4.0.3 (`.ruby-version`)
+- Node 20+ and npm
+- PostgreSQL 14+
+
+## Setup
+
+```sh
+bundle install
+npm install
+bin/rails db:prepare
+bin/rails db:seed    # admin + demo data
+bin/dev              # Rails on :3000 + esbuild & tailwind --watch (uses foreman)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Logins after seeding: `admin@example.com` / `password123` (platform admin), `demo@example.com` / `password123` (approved demo NGO).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How it works
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- `/` is a public landing page explaining the platform.
+- New NGOs register at `/register` and land on a waitlist; a platform admin approves them at `/admin`.
+- Approved orgs: search the partner directory, send connection requests (contacts revealed on accept), create projects, post participant vacancies (urgent ones float to the top of the board), and use per-project workspaces (tasks, shared links, participant roster, partners).
+- Each vacancy has a public shareable page at `/v/:token` (no login needed).
 
-## Learn More
+## Deliberately out of MVP
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Participant accounts, email notifications, file uploads (Active Storage), in-app chat, automated matching. See the PRD for the roadmap.

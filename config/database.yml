@@ -1,0 +1,31 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: erasmus_app_development
+
+test:
+  <<: *default
+  database: erasmus_app_test
+
+production:
+  primary: &primary_production
+    <<: *default
+    database: erasmus_app_production
+    username: erasmus_app
+    password: <%= ENV["ERASMUS_APP_DATABASE_PASSWORD"] %>
+  cache:
+    <<: *primary_production
+    database: erasmus_app_production_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_production
+    database: erasmus_app_production_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *primary_production
+    database: erasmus_app_production_cable
+    migrations_paths: db/cable_migrate
