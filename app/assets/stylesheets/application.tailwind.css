@@ -58,6 +58,9 @@
   .container {
     @apply mx-auto max-w-4xl p-6;
   }
+  .container.wide {
+    @apply max-w-6xl;
+  }
 
   .card {
     @apply mb-3 rounded-lg border border-gray-200 bg-white px-5 py-4 shadow-sm;

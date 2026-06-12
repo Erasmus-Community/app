@@ -4,16 +4,8 @@ import { api } from "./api";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Waitlist from "./pages/Waitlist";
-import Directory from "./pages/Directory";
-import Connections from "./pages/Connections";
-import VacancyBoard from "./pages/VacancyBoard";
-import VacancyDetail from "./pages/VacancyDetail";
-import Projects from "./pages/Projects";
-import ProjectWorkspace from "./pages/ProjectWorkspace";
-import OrgProfile from "./pages/OrgProfile";
-import Admin from "./pages/Admin";
-import PublicVacancy from "./pages/PublicVacancy";
 import Landing from "./pages/Landing";
+import AlumniMap from "./pages/AlumniMap";
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -31,13 +23,9 @@ function Nav() {
   return (
     <nav className="nav">
       <Link to="/" className="brand">Erasmus+ NGO Hub</Link>
-      <NavLink to="/app/directory">Partners</NavLink>
-      <NavLink to="/app/connections">Network</NavLink>
-      <NavLink to="/app/vacancies">Vacancy board</NavLink>
-      <NavLink to="/app/projects">My projects</NavLink>
-      {me.user.admin && <NavLink to="/app/admin">Admin</NavLink>}
+      <NavLink to="/app/alumni-map">Alumni map</NavLink>
       <span className="spacer" />
-      <NavLink to="/app/profile">{me.organization.name}</NavLink>
+      <span className="muted">{me.organization.name}</span>
       <a href="#logout" onClick={(e) => { e.preventDefault(); logout(); }}>Log out</a>
     </nav>
   );
@@ -74,18 +62,10 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/app" element={<Navigate to="/app/directory" replace />} />
+          <Route path="/app" element={<Navigate to="/app/alumni-map" replace />} />
           <Route path="/app/waitlist" element={<Waitlist />} />
-          <Route path="/v/:token" element={<PublicVacancy />} />
-          <Route path="/app/directory" element={<Protected><Directory /></Protected>} />
-          <Route path="/app/connections" element={<Protected><Connections /></Protected>} />
-          <Route path="/app/vacancies" element={<Protected><VacancyBoard /></Protected>} />
-          <Route path="/app/vacancies/:id" element={<Protected><VacancyDetail /></Protected>} />
-          <Route path="/app/projects" element={<Protected><Projects /></Protected>} />
-          <Route path="/app/projects/:id" element={<Protected><ProjectWorkspace /></Protected>} />
-          <Route path="/app/profile" element={<Protected><OrgProfile /></Protected>} />
-          <Route path="/app/admin" element={<Protected><Admin /></Protected>} />
-          <Route path="*" element={<Navigate to="/app/directory" replace />} />
+          <Route path="/app/alumni-map" element={<Protected><AlumniMap /></Protected>} />
+          <Route path="*" element={<Navigate to="/app/alumni-map" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthContext.Provider>

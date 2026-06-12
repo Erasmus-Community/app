@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+VITE_RUBY_SKIP_INSTALL_DEV_DEPENDENCIES = "true"
+require File.expand_path("../config/environment", __dir__)
+load Gem.bin_path("vite_rails", "vite")
