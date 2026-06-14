@@ -3,9 +3,12 @@ import { BrowserRouter, Routes, Route, Link, NavLink, Navigate, useNavigate } fr
 import { api } from "./api";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import RegisterOrganization from "./pages/RegisterOrganization";
 import Waitlist from "./pages/Waitlist";
 import Landing from "./pages/Landing";
 import AlumniMap from "./pages/AlumniMap";
+import Terms from "./pages/Terms";
+import Account from "./pages/Account";
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -25,8 +28,25 @@ function Nav() {
       <Link to="/" className="brand">Erasmus+ NGO Hub</Link>
       <NavLink to="/app/alumni-map">Alumni map</NavLink>
       <span className="spacer" />
-      <span className="muted">{me.organization.name}</span>
+      {me.organization ? (
+        <span className="muted">{me.organization.name}</span>
+      ) : (
+        <NavLink to="/app/register-organization" className="muted">Register your NGO</NavLink>
+      )}
+      <NavLink to="/app/account">Account</NavLink>
       <a href="#logout" onClick={(e) => { e.preventDefault(); logout(); }}>Log out</a>
+    </nav>
+  );
+}
+
+function PublicNav() {
+  return (
+    <nav className="nav">
+      <Link to="/" className="brand">Erasmus+ NGO Hub</Link>
+      <NavLink to="/app/alumni-map">Alumni map</NavLink>
+      <span className="spacer" />
+      <Link to="/login">Log in</Link>
+      <Link to="/register" className="btn" style={{ padding: "6px 16px", fontSize: 14 }}>Sign up</Link>
     </nav>
   );
 }
@@ -35,7 +55,9 @@ function Protected({ children }) {
   const { me, loading } = useAuth();
   if (loading) return null;
   if (!me) return <Navigate to="/login" replace />;
-  if (me.organization.status !== "approved" && !me.user.admin) return <Navigate to="/app/waitlist" replace />;
+  if (me.organization && me.organization.status !== "approved" && !me.user.admin) {
+    return <Navigate to="/app/waitlist" replace />;
+  }
   return (
     <>
       <Nav />
@@ -62,9 +84,21 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/app" element={<Navigate to="/app/alumni-map" replace />} />
           <Route path="/app/waitlist" element={<Waitlist />} />
-          <Route path="/app/alumni-map" element={<Protected><AlumniMap /></Protected>} />
+          <Route path="/app/account" element={<Protected><Account /></Protected>} />
+          <Route path="/app/register-organization" element={<Protected><RegisterOrganization /></Protected>} />
+          <Route path="/app/alumni-map" element={
+            loading ? null : me ? (
+              <Protected><AlumniMap /></Protected>
+            ) : (
+              <>
+                <PublicNav />
+                <main className="container"><AlumniMap /></main>
+              </>
+            )
+          } />
           <Route path="*" element={<Navigate to="/app/alumni-map" replace />} />
         </Routes>
       </BrowserRouter>

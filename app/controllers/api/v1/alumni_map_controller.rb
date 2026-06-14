@@ -1,15 +1,16 @@
 module Api
   module V1
     class AlumniMapController < BaseController
+      skip_before_action :require_login
+      skip_before_action :require_approved_organization
+
       def index
         users_with_location = User.where.not(latitude: nil, longitude: nil)
+                                  .where(map_visibility: "everyone")
                                   .includes(:organization)
 
         pins = users_with_location.filter_map do |user|
-          next unless user.visible_on_map_to?(current_organization)
-
-          # projects = user.participated_projects
-          #               .select(:id, :title, :project_type, :venue_country, :starts_on, :ends_on, :status)
+          next unless user.organization # skip users without an org for now
 
           {
             id: user.id,
@@ -20,11 +21,7 @@ module Api
             latitude: user.latitude.to_f,
             longitude: user.longitude.to_f,
             organization: { id: user.organization.id, name: user.organization.name, country: user.organization.country },
-            # projects: projects.map do |p|
-            #   { id: p.id, title: p.title, project_type: p.project_type,
-            #     venue_country: p.venue_country, starts_on: p.starts_on, ends_on: p.ends_on, status: p.status }
-            # end,
-            is_me: user.id == current_user.id
+            is_me: current_user&.id == user.id
           }
         end
 

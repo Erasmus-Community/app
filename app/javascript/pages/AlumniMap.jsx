@@ -176,7 +176,7 @@ export default function AlumniMap() {
         <span className="muted">{pins.length} participant{pins.length !== 1 ? "s" : ""} on the map</span>
       </div>
 
-      <LocationForm initial={me.user} onSaved={loadPins} />
+      {me && <LocationForm initial={me.user} onSaved={loadPins} />}
 
       <div style={{ position: "relative" }}>
         {loading && <p className="muted" style={{ padding: 16 }}>Loading map…</p>}

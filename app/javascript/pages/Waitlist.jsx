@@ -1,12 +1,13 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../App";
 
 export default function Waitlist() {
   const { me, loading } = useAuth();
   if (loading) return null;
   if (!me) return <Navigate to="/login" replace />;
-  if (me.organization.status === "approved") return <Navigate to="/app/directory" replace />;
+  if (!me.organization) return <Navigate to="/app/register-organization" replace />;
+  if (me.organization.status === "approved") return <Navigate to="/app/alumni-map" replace />;
 
   const rejected = me.organization.status === "rejected";
   return (

@@ -7,7 +7,7 @@ class MeSerializer
               current_city: user.current_city, current_country: user.current_country,
               latitude: user.latitude&.to_f, longitude: user.longitude&.to_f,
               map_visibility: user.map_visibility, bio: user.bio },
-      organization: OrganizationSerializer.call(org, contact: true)
+      organization: org ? OrganizationSerializer.call(org, contact: true) : nil
     }
   end
 end

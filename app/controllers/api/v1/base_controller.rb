@@ -21,10 +21,16 @@ module Api
 
       def require_approved_organization
         return unless current_user
-        return if current_organization.approved? || current_user.admin?
+        return if current_user.admin?
+        return if current_organization&.approved?
 
-        render json: { error: "Organization not approved yet", status: current_organization.status },
-               status: :forbidden
+        if current_organization
+          render json: { error: "Organization not approved yet", status: current_organization.status },
+                 status: :forbidden
+        else
+          render json: { error: "No organization linked to your account" },
+                 status: :forbidden
+        end
       end
 
       def render_errors(record)

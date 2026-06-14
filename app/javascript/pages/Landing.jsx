@@ -132,7 +132,7 @@ export default function Landing() {
                   to="/register"
                   className="rounded-md bg-eu-yellow px-4 py-2 text-sm font-semibold text-eu-blue-dark hover:brightness-95"
                 >
-                  Join the waitlist
+                  Sign up
                 </Link>
               </>
             )}
@@ -170,7 +170,7 @@ export default function Landing() {
                 to="/register"
                 className="rounded-lg bg-eu-yellow px-6 py-3 text-base font-bold text-eu-blue-dark shadow-lg hover:brightness-95"
               >
-                Register your NGO
+                Create your account
               </Link>
             )}
             <Link
@@ -271,7 +271,7 @@ export default function Landing() {
               to="/register"
               className="mt-6 inline-block rounded-lg bg-eu-yellow px-8 py-3 font-bold text-eu-blue-dark hover:brightness-95"
             >
-              Join the waitlist
+              Sign up free
             </Link>
           </div>
         )}

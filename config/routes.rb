@@ -5,9 +5,12 @@ Rails.application.routes.draw do
     namespace :v1 do
       resource :session, only: %i[create destroy]
       resource :registration, only: %i[create]
-      resource :me, only: %i[show], controller: "me" do
+      resources :organizations, only: %i[create]
+      resource :me, only: %i[show destroy], controller: "me" do
         patch :update_location
       end
+      resource :password, only: %i[update]
+      resource :password_reset, only: %i[create update]
 
       resources :alumni_map, only: %i[index]
 
