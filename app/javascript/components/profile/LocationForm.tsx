@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useState } from "react";
 import { COUNTRIES, countryName, MAP_VISIBILITIES } from "../../constants";
 import { apiClient } from "../../api";
 
@@ -80,18 +80,13 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
   };
 
   return (
-    <div className="card" style={{ marginBottom: 16 }}>
-      <h3 style={{ marginTop: 0 }}>Your location on the map</h3>
+    <div className="card mb-4">
+      <h3 className="mt-0">Your location on the map</h3>
       <form
         onSubmit={save}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 12,
-          alignItems: "flex-end",
-        }}
+        className="flex flex-wrap items-end gap-3"
       >
-        <div style={{ flex: "1 1 140px" }}>
+        <div className="min-w-[140px] flex-1">
           <label>City</label>
           <input
             value={form.current_city}
@@ -99,7 +94,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
             placeholder="e.g. Lisbon"
           />
         </div>
-        <div style={{ flex: "1 1 140px" }}>
+        <div className="min-w-[140px] flex-1">
           <label>Country</label>
           <select
             value={form.current_country}
@@ -115,7 +110,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
             ))}
           </select>
         </div>
-        <div style={{ flex: "0 0 auto" }}>
+        <div className="shrink-0">
           <button
             type="button"
             className="btn secondary"
@@ -125,7 +120,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
             {geocoding ? "Finding…" : "Find coordinates"}
           </button>
         </div>
-        <div style={{ flex: "1 1 100px" }}>
+        <div className="min-w-[100px] flex-1">
           <label>Lat</label>
           <input
             type="number"
@@ -135,7 +130,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
             placeholder="e.g. 38.7167"
           />
         </div>
-        <div style={{ flex: "1 1 100px" }}>
+        <div className="min-w-[100px] flex-1">
           <label>Lng</label>
           <input
             type="number"
@@ -145,7 +140,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
             placeholder="e.g. -9.1333"
           />
         </div>
-        <div style={{ flex: "1 1 180px" }}>
+        <div className="min-w-[180px] flex-1">
           <label>Who can see my pin?</label>
           <select
             value={form.map_visibility}
@@ -160,7 +155,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
             ))}
           </select>
         </div>
-        <div style={{ flex: "1 1 100%", maxWidth: 500 }}>
+        <div className="w-full max-w-lg">
           <label>Short bio (optional)</label>
           <input
             value={form.bio}
@@ -168,7 +163,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ initial, onSaved }) => {
             placeholder="e.g. Youth worker, KA1 trainer, looking to reconnect!"
           />
         </div>
-        <div style={{ flex: "1 1 100%" }}>
+        <div className="w-full">
           <button
             type="submit"
             className="btn"

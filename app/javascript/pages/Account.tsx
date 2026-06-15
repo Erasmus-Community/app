@@ -31,8 +31,8 @@ export default function Account() {
     <>
       <h1>Account</h1>
 
-      <div className="card" style={{ marginBottom: 24 }}>
-        <h3 style={{ marginTop: 0 }}>Your details</h3>
+      <div className="card mb-6">
+        <h3 className="mt-0">Your details</h3>
         <p>
           <strong>Name:</strong> {me.user.name}
         </p>
@@ -46,15 +46,13 @@ export default function Account() {
         )}
       </div>
 
-      <div className="card" style={{ border: "1px solid #ef4444" }}>
-        <h3 style={{ marginTop: 0, color: "#dc2626" }}>
-          Delete account and data
-        </h3>
+      <div className="card border border-red-400">
+        <h3 className="mt-0 text-red-600">Delete account and data</h3>
         <p>
           Under the General Data Protection Regulation (GDPR), you have the
           right to request the erasure of your personal data. This action will:
         </p>
-        <ul style={{ paddingLeft: 24, lineHeight: 1.8 }}>
+        <ul className="pl-6 leading-loose">
           <li>Permanently delete your account and login credentials</li>
           <li>Remove your name, email, bio, and location from the platform</li>
           <li>Remove your pin from the alumni map</li>
@@ -65,7 +63,7 @@ export default function Account() {
             </li>
           )}
         </ul>
-        <p style={{ fontWeight: 600 }}>
+        <p className="font-semibold">
           This action is immediate and irreversible. There is no way to recover
           your data.
         </p>
@@ -75,15 +73,8 @@ export default function Account() {
             Request data deletion
           </Button>
         ) : (
-          <div
-            style={{
-              marginTop: 12,
-              padding: 16,
-              background: "#fef2f2",
-              borderRadius: 8,
-            }}
-          >
-            <p style={{ margin: "0 0 12px" }}>
+          <div className="mt-3 rounded-lg bg-red-50 p-4">
+            <p className="mb-3 mt-0">
               Type <strong>DELETE</strong> below to confirm:
             </p>
             <TextField
@@ -92,7 +83,7 @@ export default function Account() {
               placeholder="Type DELETE to confirm"
               autoFocus
             />
-            <div className="flex gap-2 mt-3">
+            <div className="mt-3 flex gap-2">
               <Button
                 variant="danger"
                 disabled={confirmText !== "DELETE"}

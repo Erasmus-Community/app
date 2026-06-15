@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 
 export default function Terms() {
   return (
-    <main className="container" style={{ maxWidth: 760 }}>
+    <main className="container max-w-3xl">
       <h1>Terms and Conditions</h1>
       <p className="muted">Last updated: June 14, 2026</p>
 
-      <section className="stack" style={{ lineHeight: 1.7, fontSize: 15 }}>
+      <section className="stack text-[15px] leading-relaxed">
         <p>
           Welcome to Erasmus+ NGO Hub (<strong>"the Platform"</strong>). The Platform is operated by
           [COMPANY_NAME] (<strong>"we"</strong>, <strong>"us"</strong>, or <strong>"our"</strong>).
@@ -49,7 +49,7 @@ export default function Terms() {
 
         <h2>4. Acceptable use</h2>
         <p>You agree not to:</p>
-        <ul style={{ paddingLeft: 24 }}>
+        <ul className="pl-6">
           <li>provide false or misleading information about yourself or your organization;</li>
           <li>use the Platform for any purpose unrelated to Erasmus+ or youth/education/sport cooperation;</li>
           <li>harass, abuse, or threaten other users;</li>
@@ -93,7 +93,7 @@ export default function Terms() {
           details) to operate the Platform. We process data on the following legal bases under the
           General Data Protection Regulation (GDPR):
         </p>
-        <ul style={{ paddingLeft: 24 }}>
+        <ul className="pl-6">
           <li><strong>Contract performance</strong> — processing necessary to provide you with the service you signed up for;</li>
           <li><strong>Legitimate interest</strong> — platform security, fraud prevention, and service improvement;</li>
           <li><strong>Consent</strong> — optional features such as location sharing on the alumni map.</li>
@@ -173,7 +173,7 @@ export default function Terms() {
           <a href="mailto:contact@erasmusngohub.com">contact@erasmusngohub.com</a>.
         </p>
 
-        <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid #e5e7eb" }}>
+        <div className="mt-8 border-t border-gray-200 pt-6">
           <p className="muted">
             <Link to="/register">← Back to registration</Link>
           </p>

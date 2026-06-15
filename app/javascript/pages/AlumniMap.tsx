@@ -23,7 +23,7 @@ function PinSvg({ fill, stroke, size = 28 }: PinSvgProps) {
       height={h}
       viewBox="0 0 32 42"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ cursor: "pointer" }}
+      className="cursor-pointer"
     >
       <path
         d="M16 0C7.16 0 0 7.16 0 16c0 12 16 26 16 26s16-14 16-26C32 7.16 24.84 0 16 0z"
@@ -76,29 +76,18 @@ export default function AlumniMap() {
 
   return (
     <>
-      <div className="row" style={{ marginBottom: 8 }}>
-        <h1 style={{ marginBottom: 0 }}>Alumni map</h1>
+      <div className="row mb-2">
+        <h1 className="mb-0">Alumni map</h1>
         <span className="muted">
           {pins.length} participant{pins.length !== 1 ? "s" : ""} on the map
         </span>
       </div>
 
-      <div style={{ position: "relative" }}>
+      <div className="relative">
         {loading && (
-          <p className="muted" style={{ padding: 16 }}>
-            Loading map…
-          </p>
+          <p className="muted p-4">Loading map…</p>
         )}
-        <div
-          style={{
-            width: "100%",
-            height: "100vdh",
-            minHeight: "100vdh",
-            borderRadius: 8,
-            overflow: "hidden",
-            border: "1px solid #e5e7eb",
-          }}
-        >
+        <div className="h-dvh min-h-dvh w-full overflow-hidden rounded-lg border border-gray-200">
           <Map
             ref={mapRef as React.Ref<never>}
             initialViewState={{ longitude: 10, latitude: 50, zoom: 3.5 }}
@@ -137,26 +126,16 @@ export default function AlumniMap() {
                 onClose={() => setSelectedPin(null)}
                 maxWidth="320px"
               >
-                <div style={{ padding: 4 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: 4,
-                    }}
-                  >
-                    <strong style={{ fontSize: 15 }}>{selectedPin.name}</strong>
+                <div className="p-1">
+                  <div className="mb-1 flex items-center justify-between">
+                    <strong className="text-[15px]">
+                      {selectedPin.name}
+                    </strong>
                     {selectedPin.is_me && (
-                      <span className="badge open" style={{ marginLeft: 4 }}>
-                        You
-                      </span>
+                      <span className="badge open ml-1">You</span>
                     )}
                   </div>
-                  <p
-                    className="muted"
-                    style={{ margin: "4px 0", fontSize: 13 }}
-                  >
+                  <p className="muted my-1 text-[13px]">
                     {[
                       selectedPin.current_city,
                       countryName(selectedPin.current_country || ""),
@@ -164,34 +143,23 @@ export default function AlumniMap() {
                       .filter(Boolean)
                       .join(", ")}
                   </p>
-                  <p
-                    className="muted"
-                    style={{ margin: "4px 0", fontSize: 13 }}
-                  >
+                  <p className="muted my-1 text-[13px]">
                     {selectedPin.organization.name} ·{" "}
                     {countryName(selectedPin.organization.country)}
                   </p>
                   {selectedPin.bio && (
-                    <p style={{ margin: "8px 0", fontSize: 13 }}>
-                      {selectedPin.bio}
-                    </p>
+                    <p className="my-2 text-[13px]">{selectedPin.bio}</p>
                   )}
                   {selectedPin.projects.length > 0 && (
                     <>
-                      <strong
-                        style={{ fontSize: 13, display: "block", marginTop: 8 }}
-                      >
+                      <strong className="mt-2 block text-[13px]">
                         Projects participated in
                       </strong>
-                      <ul className="clean" style={{ margin: "4px 0" }}>
+                      <ul className="clean my-1">
                         {selectedPin.projects.map((p) => (
                           <li
                             key={p.id}
-                            style={{
-                              padding: "3px 0",
-                              borderBottom: "1px solid #eee",
-                              fontSize: 12,
-                            }}
+                            className="border-b border-gray-100 py-0.5 text-xs"
                           >
                             <strong>{p.title}</strong>
                             <br />
@@ -213,7 +181,7 @@ export default function AlumniMap() {
         </div>
       </div>
 
-      <p className="muted" style={{ marginTop: 12 }}>
+      <p className="muted mt-3">
         Click a pin to see a participant's projects and reconnect. Map data ©{" "}
         <a
           href="https://www.openstreetmap.org/copyright"

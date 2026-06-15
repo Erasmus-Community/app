@@ -75,8 +75,7 @@ function PublicNav() {
       <Link to="/login">Log in</Link>
       <Link
         to="/register"
-        className="btn"
-        style={{ padding: "6px 16px", fontSize: 14 }}
+        className="btn px-4 py-1.5 text-sm"
       >
         Sign up
       </Link>
