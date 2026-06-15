@@ -121,7 +121,7 @@ export default function Terms() {
         <h2>10. Disclaimers</h2>
         <p>
           The Platform is provided <strong>"as is"</strong> and <strong>"as available"</strong>
-          without warranties of any kind, express or implied, including but not limited to
+          {" "}without warranties of any kind, express or implied, including but not limited to
           merchantability, fitness for a particular purpose, or non-infringement.
         </p>
         <p>

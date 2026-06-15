@@ -4,6 +4,6 @@ import App from "../App";
 import "../../assets/stylesheets/application.tailwind.css";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const root = createRoot(document.getElementById("root"));
+  const root = createRoot(document.getElementById("root")!);
   root.render(<App />);
 });
