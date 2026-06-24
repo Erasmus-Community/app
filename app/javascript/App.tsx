@@ -73,10 +73,7 @@ function PublicNav() {
       <NavLink to="/app/alumni-map">Alumni map</NavLink>
       <span className="spacer" />
       <Link to="/login">Log in</Link>
-      <Link
-        to="/register"
-        className="btn px-4 py-1.5 text-sm"
-      >
+      <Link to="/register" className="btn px-4 py-1.5 text-sm">
         Sign up
       </Link>
     </nav>
@@ -97,7 +94,7 @@ function Protected({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Nav />
-      <main className="container">{children}</main>
+      <main>{children}</main>
     </>
   );
 }

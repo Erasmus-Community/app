@@ -4,5 +4,6 @@ import ViteRuby from "vite-plugin-ruby";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [ViteRuby(), react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), ViteRuby()],
+  mode: process.env.RAILS_ENV || "development",
 });

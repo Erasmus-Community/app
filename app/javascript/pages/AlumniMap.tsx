@@ -84,16 +84,21 @@ export default function AlumniMap() {
       </div>
 
       <div className="relative">
-        {loading && (
-          <p className="muted p-4">Loading map…</p>
-        )}
+        {loading && <p className="muted p-4">Loading map…</p>}
         <div className="h-dvh min-h-dvh w-full overflow-hidden rounded-lg border border-gray-200">
           <Map
             ref={mapRef as React.Ref<never>}
-            initialViewState={{ longitude: 10, latitude: 50, zoom: 3.5 }}
+            initialViewState={{
+              longitude: 10,
+              latitude: 50,
+              zoom: 3.5,
+            }}
             style={{ width: "100%", height: "100%" }}
             mapStyle={MAP_STYLE}
             attributionControl={{}}
+            projection="globe"
+            maxZoom={4}
+            minZoom={3}
           >
             <NavigationControl position="top-left" />
 
@@ -128,9 +133,7 @@ export default function AlumniMap() {
               >
                 <div className="p-1">
                   <div className="mb-1 flex items-center justify-between">
-                    <strong className="text-[15px]">
-                      {selectedPin.name}
-                    </strong>
+                    <strong className="text-[15px]">{selectedPin.name}</strong>
                     {selectedPin.is_me && (
                       <span className="badge open ml-1">You</span>
                     )}

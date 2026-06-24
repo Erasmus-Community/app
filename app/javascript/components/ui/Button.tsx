@@ -27,7 +27,7 @@ export default function Button({
       disabled={disabled || loading}
       {...props}
     >
-      {loading ? (loadingText || "Saving…") : children}
+      {loading ? loadingText || "Saving…" : children}
     </button>
   );
 }
