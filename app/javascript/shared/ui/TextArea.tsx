@@ -5,8 +5,17 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   error?: string;
 }
 
-export default function TextArea({ label, error, id, rows = 3, className = "", ...props }: TextAreaProps) {
-  const inputId = id || (label ? `field-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
+export default function TextArea({
+  label,
+  error,
+  id,
+  rows = 3,
+  className = "",
+  ...props
+}: TextAreaProps) {
+  const inputId =
+    id ||
+    (label ? `field-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
 
   return (
     <div className={className}>

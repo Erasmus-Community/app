@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../App";
+import { useAuth } from "../../App";
 
 export default function Waitlist() {
   const { me, loading } = useAuth();

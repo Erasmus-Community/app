@@ -4,7 +4,16 @@ class User < ApplicationRecord
 
   has_secure_password
 
+  # Legacy single-org FK (kept for MeSerializer / waitlist compat)
   belongs_to :organization, optional: true
+
+  # Multi-org memberships
+  has_many :memberships, dependent: :destroy
+  has_many :organizations_as_member, through: :memberships, source: :organization
+
+  # Projects participated in via the join table
+  has_many :project_participants, dependent: :destroy
+  has_many :projects, through: :project_participants
 
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP },
@@ -21,16 +30,15 @@ class User < ApplicationRecord
     latitude.present? && longitude.present?
   end
 
-  # Projects this user participated in (via roster entries matched by email)
-  def participated_projects
-    Project.joins(:roster_entries).where(roster_entries: { email: email }).distinct
+  def owned_organizations
+    organizations_as_member.merge(Membership.owners)
   end
 
   def visible_on_map_to?(viewer_org)
     return true if map_visibility == "everyone"
-    return true if organization_id == viewer_org.id
+    return true if organization_id == viewer_org&.id
 
-    organization.connected_to?(viewer_org)
+    false
   end
 
   # ── Password Reset ──────────────────────────────────────────────

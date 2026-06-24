@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiClient } from "../api";
-import { useAuth } from "../App";
+import { apiClient } from "../../shared/api/client";
+import { useAuth } from "../../App";
 import {
   TextField,
   Button,
   Checkbox,
   FormError,
   FormStack,
-} from "../components/ui";
-import type { MeResponse } from "../types";
+} from "../../shared/ui";
+import type { MeResponse } from "./types";
 
 export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });

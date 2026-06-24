@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiClient } from "../api";
-import { useAuth } from "../App";
-import { COUNTRIES, KEY_ACTIONS, EXPERTISES } from "../constants";
+import { apiClient } from "../../shared/api/client";
+import { useAuth } from "../../App";
+import { COUNTRIES } from "../../shared/constants/countries";
+import { KEY_ACTIONS, EXPERTISES } from "./constants";
 import {
   TextField,
   TextArea,
@@ -11,8 +12,8 @@ import {
   CheckboxGroup,
   FormError,
   FormStack,
-} from "../components/ui";
-import type { MeResponse } from "../types";
+} from "../../shared/ui";
+import type { MeResponse } from "../auth/types";
 
 interface OrgForm {
   name: string;
@@ -46,9 +47,7 @@ export default function RegisterOrganization() {
     try {
       const updated = await apiClient.post<MeResponse>(
         "/api/v1/organizations",
-        {
-          organization: org,
-        },
+        { organization: org },
       );
       setMe(updated);
       navigate("/app/waitlist");

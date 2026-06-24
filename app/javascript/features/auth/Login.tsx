@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiClient } from "../api";
-import { useAuth } from "../App";
-import { TextField, Button, FormError, FormStack } from "../components/ui";
-import type { MeResponse } from "../types";
+import { apiClient } from "../../shared/api/client";
+import { useAuth } from "../../App";
+import { TextField, Button, FormError, FormStack } from "../../shared/ui";
+import type { MeResponse } from "./types";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ export default function Login() {
       setMe(me);
       navigate(
         me.organization?.status === "approved"
-          ? "/app/directory"
+          ? "/app/alumni-map"
           : "/app/waitlist",
       );
     } catch (err) {

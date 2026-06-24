@@ -5,7 +5,9 @@ Rails.application.routes.draw do
     namespace :v1 do
       resource :session, only: %i[create destroy]
       resource :registration, only: %i[create]
-      resources :organizations, only: %i[create]
+      resources :organizations, only: %i[create show] do
+        resources :projects, only: %i[index create], shallow: true
+      end
       resource :me, only: %i[show destroy], controller: "me" do
         patch :update_location
       end

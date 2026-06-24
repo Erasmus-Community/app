@@ -16,7 +16,9 @@ export default function Select({
   className = "",
   ...props
 }: SelectProps) {
-  const inputId = id || (label ? `field-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
+  const inputId =
+    id ||
+    (label ? `field-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
 
   return (
     <div className={className}>
@@ -24,7 +26,9 @@ export default function Select({
       <select id={inputId} {...props}>
         {placeholder && <option value="">{placeholder}</option>}
         {options.map(([value, text]) => (
-          <option key={value} value={value}>{text}</option>
+          <option key={value} value={value}>
+            {text}
+          </option>
         ))}
       </select>
       {error && <p className="error">{error}</p>}

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { apiClient } from "../api";
-import { useAuth } from "../App";
-import { TextField, Button, FormError } from "../components/ui";
+import { Link, useNavigate } from "react-router-dom";
+import { apiClient } from "../../shared/api/client";
+import { useAuth } from "../../App";
+import { TextField, Button, FormError } from "../../shared/ui";
+import LocationForm from "./LocationForm";
 
 export default function Account() {
   const { me, setMe } = useAuth();
@@ -27,8 +28,10 @@ export default function Account() {
 
   if (!me) return null;
 
+  const isOrgOwner = me.user.org_role === "org_admin" && !!me.organization;
+
   return (
-    <>
+    <div className="container">
       <h1>Account</h1>
 
       <div className="card mb-6">
@@ -41,10 +44,41 @@ export default function Account() {
         </p>
         {me.organization && (
           <p>
-            <strong>Organization:</strong> {me.organization.name}
+            <strong>Organization:</strong>{" "}
+            {isOrgOwner ? (
+              <Link to={`/app/organizations/${me.organization.id}`}>
+                {me.organization.name}
+              </Link>
+            ) : (
+              me.organization.name
+            )}
+            {isOrgOwner && (
+              <span className="badge open ml-2">Owner</span>
+            )}
+          </p>
+        )}
+        {!me.organization && (
+          <p className="muted mt-3">
+            <Link to="/app/register-organization">Register your NGO →</Link>
           </p>
         )}
       </div>
+
+      <LocationForm
+        initial={{
+          current_city: me.user.current_city,
+          current_country: me.user.current_country,
+          latitude: me.user.latitude,
+          longitude: me.user.longitude,
+          map_visibility: me.user.map_visibility,
+          bio: me.user.bio,
+        }}
+        onSaved={() => {
+          apiClient.get("/api/v1/me").then((updated) =>
+            setMe(updated as typeof me),
+          );
+        }}
+      />
 
       <div className="card border border-red-400">
         <h3 className="mt-0 text-red-600">Delete account and data</h3>
@@ -108,6 +142,6 @@ export default function Account() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

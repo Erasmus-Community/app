@@ -8,12 +8,17 @@ interface CheckboxGroupProps {
   onChange: (selected: string[]) => void;
 }
 
-export default function CheckboxGroup({ legend, options, selected = [], onChange }: CheckboxGroupProps) {
+export default function CheckboxGroup({
+  legend,
+  options,
+  selected = [],
+  onChange,
+}: CheckboxGroupProps) {
   const toggle = (value: string) => {
     onChange(
       selected.includes(value)
         ? selected.filter((v) => v !== value)
-        : [...selected, value]
+        : [...selected, value],
     );
   };
 

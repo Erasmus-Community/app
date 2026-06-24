@@ -5,8 +5,16 @@ interface TextFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export default function TextField({ label, error, id, className = "", ...props }: TextFieldProps) {
-  const inputId = id || (label ? `field-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
+export default function TextField({
+  label,
+  error,
+  id,
+  className = "",
+  ...props
+}: TextFieldProps) {
+  const inputId =
+    id ||
+    (label ? `field-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined);
 
   return (
     <div className={className}>

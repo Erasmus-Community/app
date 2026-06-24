@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_15_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_24_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "memberships", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "organization_id", null: false
+    t.string "role", default: "participant", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["organization_id"], name: "index_memberships_on_organization_id"
+    t.index ["role"], name: "index_memberships_on_role"
+    t.index ["user_id", "organization_id"], name: "index_memberships_on_user_id_and_organization_id", unique: true
+    t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
 
   create_table "organizations", force: :cascade do |t|
     t.string "country", null: false
@@ -30,6 +42,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_000001) do
     t.index ["expertises"], name: "index_organizations_on_expertises", using: :gin
     t.index ["key_actions"], name: "index_organizations_on_key_actions", using: :gin
     t.index ["status"], name: "index_organizations_on_status"
+  end
+
+  create_table "project_participants", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "project_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["project_id", "user_id"], name: "index_project_participants_on_project_id_and_user_id", unique: true
+    t.index ["project_id"], name: "index_project_participants_on_project_id"
+    t.index ["user_id"], name: "index_project_participants_on_user_id"
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "ends_on"
+    t.string "key_action", null: false
+    t.bigint "organization_id", null: false
+    t.string "project_type", null: false
+    t.date "starts_on"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "venue_country", limit: 2
+    t.index ["key_action"], name: "index_projects_on_key_action"
+    t.index ["organization_id"], name: "index_projects_on_organization_id"
+    t.index ["project_type"], name: "index_projects_on_project_type"
   end
 
   create_table "users", force: :cascade do |t|
@@ -55,5 +93,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_000001) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "memberships", "organizations"
+  add_foreign_key "memberships", "users"
+  add_foreign_key "project_participants", "projects"
+  add_foreign_key "project_participants", "users"
+  add_foreign_key "projects", "organizations"
   add_foreign_key "users", "organizations"
 end
