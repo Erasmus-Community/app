@@ -28,7 +28,7 @@ export default function Account() {
 
   if (!me) return null;
 
-  const isOrgOwner = me.user.org_role === "org_admin" && !!me.organization;
+  const isOrgOwner = me.user.is_owner && !!me.organization;
 
   return (
     <div className="container">

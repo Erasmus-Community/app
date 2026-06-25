@@ -7,16 +7,15 @@ module Api
         render json: MeSerializer.call(current_user)
       end
 
-      # GDPR: immediately delete the user's account and all personal data.
-      # If the user is the sole member of their org, the org is also destroyed.
+      # GDPR: delete the user account and all personal data.
+      # Any org they own and that has no other members is also deleted.
       def destroy
         ActiveRecord::Base.transaction do
-          org = current_user.organization
+          owned_org = current_user.owned_organization
           current_user.destroy!
 
-          # Clean up orphaned organization (no remaining members)
-          if org && org.users.count.zero?
-            org.destroy!
+          if owned_org && owned_org.members.count.zero?
+            owned_org.destroy!
           end
         end
 

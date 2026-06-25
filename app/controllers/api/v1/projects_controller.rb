@@ -11,7 +11,7 @@ module Api
 
       # POST /api/v1/organizations/:organization_id/projects
       def create
-        unless current_user.organization_id == @organization.id && current_user.org_admin?
+        unless current_user.owner_of?(@organization)
           render json: { error: "Only organization owners can create projects" }, status: :forbidden
           return
         end

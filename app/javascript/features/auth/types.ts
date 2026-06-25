@@ -6,9 +6,8 @@ export interface User {
   name: string;
   email: string;
   admin: boolean;
-  /** Role within their primary (owned) organization */
-  org_role: "member" | "org_admin";
-  organization_id?: number;
+  /** True if this user owns an organization */
+  is_owner: boolean;
   latitude?: number;
   longitude?: number;
   current_city?: string;
@@ -19,8 +18,7 @@ export interface User {
 
 /**
  * Returned by GET /api/v1/me.
- * organization is the org the user owns (org_admin), or the first org they
- * belong to, or null if they haven't joined any yet.
+ * organization is the org this user owns, or null.
  */
 export interface MeResponse {
   user: User;

@@ -1,44 +1,46 @@
 class User < ApplicationRecord
-  ORG_ROLES = %w[member org_admin].freeze
   MAP_VISIBILITIES = %w[everyone connections].freeze
 
   has_secure_password
 
-  # Legacy single-org FK (kept for MeSerializer / waitlist compat)
-  belongs_to :organization, optional: true
-
-  # Multi-org memberships
   has_many :memberships, dependent: :destroy
-  has_many :organizations_as_member, through: :memberships, source: :organization
+  has_many :organizations, through: :memberships
 
-  # Projects participated in via the join table
   has_many :project_participants, dependent: :destroy
   has_many :projects, through: :project_participants
 
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP },
                     uniqueness: { case_sensitive: false }
-  validates :org_role, inclusion: { in: ORG_ROLES }, if: :organization_id?
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :map_visibility, inclusion: { in: MAP_VISIBILITIES }
 
   normalizes :email, with: ->(e) { e.strip.downcase }
 
-  def org_admin? = org_role == "org_admin"
+  # The org this user owns (role: "owner"), if any
+  def owned_organization
+    memberships.find_by(role: "owner")&.organization
+  end
+
+  # All orgs the user belongs to (owned + participant)
+  def all_organizations
+    organizations
+  end
+
+  def owner?
+    memberships.exists?(role: "owner")
+  end
+
+  def owner_of?(org)
+    memberships.exists?(organization: org, role: "owner")
+  end
 
   def has_location?
     latitude.present? && longitude.present?
   end
 
-  def owned_organizations
-    organizations_as_member.merge(Membership.owners)
-  end
-
-  def visible_on_map_to?(viewer_org)
-    return true if map_visibility == "everyone"
-    return true if organization_id == viewer_org&.id
-
-    false
+  def visible_on_map_to?(_viewer)
+    map_visibility == "everyone"
   end
 
   # ── Password Reset ──────────────────────────────────────────────

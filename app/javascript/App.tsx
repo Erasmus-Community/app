@@ -78,7 +78,7 @@ function Nav({ visible, onToggle }: { visible: boolean; onToggle: () => void }) 
           <NavLink to="/app/alumni-map">Alumni map</NavLink>
           <span className="spacer" />
           {me?.organization ? (
-            me.user.org_role === "org_admin" ? (
+            me.user.is_owner ? (
               <NavLink to={`/app/organizations/${me.organization.id}`} className="muted">
                 {me.organization.name}
               </NavLink>

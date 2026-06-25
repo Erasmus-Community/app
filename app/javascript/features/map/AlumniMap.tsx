@@ -12,7 +12,7 @@ import { countryName } from "../../shared/constants/countries";
 import { projectTypeLabel } from "../organization/constants";
 import { MAP_STYLE } from "./constants";
 import { COUNTRY_CENTROIDS } from "./countryCentroids";
-import type { AlumniPin, AlumniPinProject, VenuePin } from "./types";
+import type { AlumniPin, AlumniPinProject, VenuePin, VenueParticipant } from "./types";
 
 // ── Pin SVGs ─────────────────────────────────────────────────────
 
@@ -150,51 +150,47 @@ function MapLegend() {
 
 // ── Helpers ──────────────────────────────────────────────────────
 
-/** Build synthetic VenuePin objects from location pins' projects arrays.
- *  Groups multiple projects at the same country for the same user into one pin. */
+/** Build one VenuePin per distinct venue country, aggregating all participants. */
 function buildVenuePins(pins: AlumniPin[]): VenuePin[] {
-  const result: VenuePin[] = [];
+  // country → { coords, participants map }
+  const byCountry = new Map<string, { coords: [number, number]; participantsMap: Map<number, VenueParticipant> }>();
 
   for (const pin of pins) {
-    if (!pin.projects.length) continue;
-
-    // Group by venue_country
-    const byCountry = new Map<string, AlumniPinProject[]>();
     for (const project of pin.projects) {
       if (!project.venue_country) continue;
       const coords = COUNTRY_CENTROIDS[project.venue_country];
       if (!coords) continue;
-      const existing = byCountry.get(project.venue_country) ?? [];
-      existing.push(project);
-      byCountry.set(project.venue_country, existing);
-    }
 
-    for (const [country, projects] of byCountry.entries()) {
-      const coords = COUNTRY_CENTROIDS[country]!;
-      result.push({
-        key: `venue-${pin.id}-${country}`,
-        latitude: coords[1],
-        longitude: coords[0],
-        country,
-        projects,
-        participant: {
+      if (!byCountry.has(project.venue_country)) {
+        byCountry.set(project.venue_country, { coords, participantsMap: new Map() });
+      }
+      const entry = byCountry.get(project.venue_country)!;
+
+      const existing = entry.participantsMap.get(pin.id);
+      if (existing) {
+        existing.projects.push(project);
+      } else {
+        entry.participantsMap.set(pin.id, {
           id: pin.id,
           name: pin.name,
           organization: pin.organization,
-        },
-        is_me: pin.is_me,
-      });
+          is_me: pin.is_me,
+          projects: [project],
+        });
+      }
     }
   }
 
-  return result;
+  return Array.from(byCountry.entries()).map(([country, { coords, participantsMap }]) => ({
+    key: `venue-${country}`,
+    latitude: coords[1],
+    longitude: coords[0],
+    country,
+    participants: Array.from(participantsMap.values()),
+  }));
 }
 
 // ── Main component ───────────────────────────────────────────────
-
-type SelectedPin =
-  | { type: "location"; pin: AlumniPin }
-  | { type: "venue"; pin: VenuePin };
 
 export default function AlumniMap() {
   const { me } = useAuth();
@@ -206,7 +202,11 @@ export default function AlumniMap() {
     }) => void;
   } | null>(null);
   const [pins, setPins] = useState<AlumniPin[]>([]);
-  const [selected, setSelected] = useState<SelectedPin | null>(null);
+  const [selectedPin, setSelectedPin] = useState<AlumniPin | null>(null);
+  // Highlight participants who went to a venue country
+  const [venueFilter, setVenueFilter] = useState<{ country: string; ids: Set<number> } | null>(null);
+  // Highlight venue pins for a single participant
+  const [participantFilter, setParticipantFilter] = useState<{ id: number; name: string; venueKeys: Set<string> } | null>(null);
   const [loading, setLoading] = useState(true);
   const [dismissedActions, setDismissedActions] = useState<Set<string>>(
     new Set(),
@@ -236,18 +236,38 @@ export default function AlumniMap() {
 
   const handleLocationClick = useCallback(
     (pin: AlumniPin) => {
-      setSelected({ type: "location", pin });
+      setSelectedPin(pin);
+      // Keep venueFilter alive so the popup can highlight the relevant projects
       flyTo(pin.longitude, pin.latitude, 6);
     },
     [flyTo],
   );
 
   const handleVenueClick = useCallback(
-    (pin: VenuePin) => {
-      setSelected({ type: "venue", pin });
-      flyTo(pin.longitude, pin.latitude, 5);
+    (vp: VenuePin) => {
+      setSelectedPin(null);
+      setParticipantFilter(null);
+      setVenueFilter({
+        country: vp.country,
+        ids: new Set(vp.participants.map((p) => p.id)),
+      });
+      flyTo(vp.longitude, vp.latitude, 4);
     },
     [flyTo],
+  );
+
+  const handleShowVenues = useCallback(
+    (pin: AlumniPin) => {
+      const venueKeys = new Set(
+        pin.projects
+          .filter((p) => p.venue_country && COUNTRY_CENTROIDS[p.venue_country])
+          .map((p) => `venue-${p.venue_country}`)
+      );
+      setSelectedPin(null);
+      setVenueFilter(null);
+      setParticipantFilter({ id: pin.id, name: pin.name, venueKeys });
+    },
+    [],
   );
 
   const dismissAction = useCallback((id: string) => {
@@ -257,7 +277,9 @@ export default function AlumniMap() {
   const flyToMyPin = useCallback(() => {
     const myPin = pins.find((p) => p.is_me);
     if (myPin) {
-      setSelected({ type: "location", pin: myPin });
+      setSelectedPin(myPin);
+      setVenueFilter(null);
+      setParticipantFilter(null);
       flyTo(myPin.longitude, myPin.latitude, 6);
     }
   }, [pins, flyTo]);
@@ -357,20 +379,28 @@ export default function AlumniMap() {
       : []),
   ].filter((a) => !dismissedActions.has(a.id));
 
-  // Popup position
-  const popupLng =
-    selected?.type === "location"
-      ? selected.pin.longitude
-      : selected?.pin.longitude ?? 0;
-  const popupLat =
-    selected?.type === "location"
-      ? selected.pin.latitude
-      : selected?.pin.latitude ?? 0;
-
   return (
     <div className="relative h-dvh w-full">
       <MapOverlayActions actions={allActions} onDismiss={dismissAction} />
       <MapLegend />
+
+      {/* ── Filter banner ── */}
+      {(venueFilter || participantFilter) && (
+        <div className="pointer-events-auto absolute bottom-16 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full bg-white/95 px-4 py-2 shadow-md backdrop-blur-sm">
+          <span className="text-sm font-medium text-gray-700">
+            {venueFilter
+              ? `Participants in ${countryName(venueFilter.country)} · ${venueFilter.ids.size} person${venueFilter.ids.size !== 1 ? "s" : ""}`
+              : `Venues for ${participantFilter!.name} · ${participantFilter!.venueKeys.size} countr${participantFilter!.venueKeys.size !== 1 ? "ies" : "y"}`}
+          </span>
+          <button
+            onClick={() => { setVenueFilter(null); setParticipantFilter(null); }}
+            className="flex cursor-pointer items-center gap-1 rounded-full border-0 bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500 hover:bg-gray-200"
+          >
+            Clear ✕
+          </button>
+        </div>
+      )}
+
       {loading && (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-16">
           <span className="rounded-full bg-white/90 px-3 py-1.5 text-sm text-gray-500 shadow-sm backdrop-blur-sm">
@@ -392,61 +422,74 @@ export default function AlumniMap() {
           <NavigationControl position="top-left" />
 
           {/* ── Location pins ── */}
-          {pins.map((pin) => (
-            <Marker
-              key={`loc-${pin.id}`}
-              longitude={pin.longitude}
-              latitude={pin.latitude}
-              anchor="bottom"
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                handleLocationClick(pin);
-              }}
-            >
-              <LocationPinSvg
-                fill={pin.is_me ? "#ffd617" : "#1f4e9c"}
-                stroke={pin.is_me ? "#1f4e9c" : "#ffffff"}
-                size={pin.is_me ? 36 : 28}
-              />
-            </Marker>
-          ))}
+          {pins.map((pin) => {
+            const isVenueFiltered = venueFilter !== null;
+            const isParticipantFiltered = participantFilter !== null;
+            const isHighlighted = venueFilter?.ids.has(pin.id) ?? false;
+            const isParticipant = participantFilter?.id === pin.id;
+            const isDimmed = (isVenueFiltered && !isHighlighted) || (isParticipantFiltered && !isParticipant);
+            return (
+              <Marker
+                key={`loc-${pin.id}`}
+                longitude={pin.longitude}
+                latitude={pin.latitude}
+                anchor="bottom"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  handleLocationClick(pin);
+                }}
+              >
+                <div style={{ opacity: isDimmed ? 0.15 : 1, transition: "opacity 0.2s" }}>
+                  <LocationPinSvg
+                    fill={isHighlighted ? "#e85d04" : isParticipant ? "#e85d04" : pin.is_me ? "#ffd617" : "#1f4e9c"}
+                    stroke={isHighlighted || isParticipant ? "#ffffff" : pin.is_me ? "#1f4e9c" : "#ffffff"}
+                    size={isHighlighted || isParticipant ? 34 : pin.is_me ? 36 : 28}
+                  />
+                </div>
+              </Marker>
+            );
+          })}
 
           {/* ── Project venue pins ── */}
-          {venuePins.map((vp) => (
-            <Marker
-              key={vp.key}
-              longitude={vp.longitude}
-              latitude={vp.latitude}
-              anchor="center"
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                handleVenueClick(vp);
-              }}
-            >
-              <VenuePinSvg isMe={vp.is_me} size={vp.is_me ? 26 : 20} />
-            </Marker>
-          ))}
+          {/* Hidden during venue filter; shown (with highlighting) during participant filter */}
+          {!venueFilter && venuePins.map((vp) => {
+            const isMeHere = vp.participants.some((p) => p.is_me);
+            const isHighlightedVenue = participantFilter?.venueKeys.has(vp.key) ?? false;
+            const isDimmedVenue = participantFilter !== null && !isHighlightedVenue;
+            return (
+              <Marker
+                key={vp.key}
+                longitude={vp.longitude}
+                latitude={vp.latitude}
+                anchor="center"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  handleVenueClick(vp);
+                }}
+              >
+                <div style={{ opacity: isDimmedVenue ? 0.15 : 1, transition: "opacity 0.2s" }}>
+                  <VenuePinSvg isMe={isHighlightedVenue || isMeHere} size={isHighlightedVenue ? 26 : isMeHere ? 26 : 20} />
+                </div>
+              </Marker>
+            );
+          })}
 
-          {/* ── Popup ── */}
-          {selected && (
+          {/* ── Location popup ── */}
+          {selectedPin && (
             <Popup
-              longitude={popupLng}
-              latitude={popupLat}
+              longitude={selectedPin.longitude}
+              latitude={selectedPin.latitude}
               anchor="bottom"
-              offset={
-                selected.type === "location"
-                  ? ([0, -40] as [number, number])
-                  : ([0, -16] as [number, number])
-              }
+              offset={[0, -40] as [number, number]}
               closeOnClick={false}
-              onClose={() => setSelected(null)}
+              onClose={() => setSelectedPin(null)}
               maxWidth="320px"
             >
-              {selected.type === "location" ? (
-                <LocationPopup pin={selected.pin} />
-              ) : (
-                <VenuePopup pin={selected.pin} />
-              )}
+              <LocationPopup
+                pin={selectedPin}
+                venueFilter={venueFilter}
+                onShowVenues={() => handleShowVenues(selectedPin)}
+              />
             </Popup>
           )}
         </MapGL>
@@ -457,9 +500,25 @@ export default function AlumniMap() {
 
 // ── Popup content components ─────────────────────────────────────
 
-function LocationPopup({ pin }: { pin: AlumniPin }) {
+function LocationPopup({
+  pin,
+  venueFilter,
+  onShowVenues,
+}: {
+  pin: AlumniPin;
+  venueFilter: { country: string; ids: Set<number> } | null;
+  onShowVenues: () => void;
+}) {
+  const venueProjects = venueFilter
+    ? pin.projects.filter((p) => p.venue_country === venueFilter.country)
+    : [];
+  const otherProjects = venueFilter
+    ? pin.projects.filter((p) => p.venue_country !== venueFilter.country)
+    : pin.projects;
+  const hasVenues = pin.projects.some((p) => p.venue_country && COUNTRY_CENTROIDS[p.venue_country]);
+
   return (
-    <div className="p-1">
+    <div className="p-1" style={{ maxHeight: 320, overflowY: "auto" }}>
       <div className="mb-1 flex items-center gap-1.5">
         <LocationPinSvg fill="#1f4e9c" stroke="#ffffff" size={14} />
         <strong className="text-[15px]">{pin.name}</strong>
@@ -474,17 +533,44 @@ function LocationPopup({ pin }: { pin: AlumniPin }) {
         {pin.organization.name} · {countryName(pin.organization.country)}
       </p>
       {pin.bio && <p className="my-2 text-[13px]">{pin.bio}</p>}
-      {pin.projects.length > 0 && (
+
+      {hasVenues && (
+        <button
+          onClick={onShowVenues}
+          className="mt-1 flex cursor-pointer items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+        >
+          Show venues on map →
+        </button>
+      )}
+
+      {venueProjects.length > 0 && (
         <>
           <p className="muted mt-2 text-[11px] font-semibold uppercase tracking-wide">
-            Projects participated in
+            Projects in {countryName(venueFilter!.country)}
           </p>
           <ul className="clean my-1">
-            {pin.projects.map((p) => (
-              <li
-                key={p.id}
-                className="border-b border-gray-100 py-0.5 text-xs"
-              >
+            {venueProjects.map((p) => (
+              <li key={p.id} className="border-b border-orange-100 bg-orange-50 px-1 py-0.5 text-xs">
+                <strong>{p.title}</strong>
+                <br />
+                <span className="muted">
+                  {p.key_action} · {projectTypeLabel(p.project_type)}
+                  {p.starts_on && ` · ${p.starts_on}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {otherProjects.length > 0 && (
+        <>
+          <p className="muted mt-2 text-[11px] font-semibold uppercase tracking-wide">
+            {venueProjects.length > 0 ? "Other projects" : "Projects participated in"}
+          </p>
+          <ul className="clean my-1">
+            {otherProjects.map((p) => (
+              <li key={p.id} className="border-b border-gray-100 py-0.5 text-xs">
                 <strong>{p.title}</strong>
                 <br />
                 <span className="muted">
@@ -497,42 +583,6 @@ function LocationPopup({ pin }: { pin: AlumniPin }) {
           </ul>
         </>
       )}
-    </div>
-  );
-}
-
-function VenuePopup({ pin }: { pin: VenuePin }) {
-  return (
-    <div className="p-1">
-      <div className="mb-1 flex items-center gap-1.5">
-        <VenuePinSvg isMe={pin.is_me} size={14} />
-        <strong className="text-[14px]">
-          Project venue · {countryName(pin.country)}
-        </strong>
-      </div>
-      <p className="muted my-1 text-[13px]">
-        Participant: <strong>{pin.participant.name}</strong>
-        {pin.is_me && <span className="badge open ml-1">You</span>}
-      </p>
-      <p className="muted my-1 text-[13px]">
-        {pin.participant.organization.name} ·{" "}
-        {countryName(pin.participant.organization.country)}
-      </p>
-      <p className="muted mt-2 text-[11px] font-semibold uppercase tracking-wide">
-        Projects here
-      </p>
-      <ul className="clean my-1">
-        {pin.projects.map((p) => (
-          <li key={p.id} className="border-b border-gray-100 py-0.5 text-xs">
-            <strong>{p.title}</strong>
-            <br />
-            <span className="muted">
-              {p.key_action} · {projectTypeLabel(p.project_type)}
-              {p.starts_on && ` · ${p.starts_on}`}
-            </span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

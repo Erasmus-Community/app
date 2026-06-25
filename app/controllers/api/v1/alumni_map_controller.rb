@@ -7,10 +7,12 @@ module Api
       def index
         users_with_location = User.where.not(latitude: nil, longitude: nil)
                                   .where(map_visibility: "everyone")
-                                  .includes(:organization, :projects)
+                                  .includes(memberships: :organization, projects: [])
 
         pins = users_with_location.filter_map do |user|
-          next unless user.organization
+          # Use the owned org first, fall back to any membership org
+          org = user.owned_organization || user.organizations.first
+          next unless org
 
           {
             id: user.id,
@@ -20,11 +22,7 @@ module Api
             current_country: user.current_country,
             latitude: user.latitude.to_f,
             longitude: user.longitude.to_f,
-            organization: {
-              id: user.organization.id,
-              name: user.organization.name,
-              country: user.organization.country
-            },
+            organization: { id: org.id, name: org.name, country: org.country },
             is_me: current_user&.id == user.id,
             projects: user.projects.map do |p|
               {

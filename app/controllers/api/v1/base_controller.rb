@@ -19,13 +19,23 @@ module Api
         render json: { error: "Not signed in" }, status: :unauthorized unless current_user
       end
 
+      # A user can access the app if:
+      #   - they are a platform admin, OR
+      #   - they own an approved organization, OR
+      #   - they are a participant in any approved organization
       def require_approved_organization
         return unless current_user
         return if current_user.admin?
-        return if current_organization&.approved?
 
-        if current_organization
-          render json: { error: "Organization not approved yet", status: current_organization.status },
+        approved = current_user.memberships
+                               .joins(:organization)
+                               .where(organizations: { status: "approved" })
+                               .exists?
+        return if approved
+
+        owned = current_organization
+        if owned
+          render json: { error: "Organization not approved yet", status: owned.status },
                  status: :forbidden
         else
           render json: { error: "No organization linked to your account" },

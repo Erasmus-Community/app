@@ -1,12 +1,8 @@
 class Organization < ApplicationRecord
-  STATUSES = %w[waitlisted approved rejected].freeze
+  STATUSES   = %w[waitlisted approved rejected].freeze
   KEY_ACTIONS = %w[KA1 KA2 KA3].freeze
-  EXPERTISES = %w[youth sport digital inclusion environment culture education health entrepreneurship rural].freeze
+  EXPERTISES  = %w[youth sport digital inclusion environment culture education health entrepreneurship rural].freeze
 
-  # Legacy FK users (org_admin members via the users.organization_id column)
-  has_many :users, dependent: :destroy
-
-  # Multi-org memberships
   has_many :memberships, dependent: :destroy
   has_many :members, through: :memberships, source: :user
 
@@ -17,10 +13,14 @@ class Organization < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validate :key_actions_are_known
 
-  scope :approved, -> { where(status: "approved") }
+  scope :approved,   -> { where(status: "approved") }
   scope :waitlisted, -> { where(status: "waitlisted") }
 
   def approved? = status == "approved"
+
+  def owner
+    memberships.find_by(role: "owner")&.user
+  end
 
   private
 

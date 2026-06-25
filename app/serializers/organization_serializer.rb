@@ -1,5 +1,5 @@
 class OrganizationSerializer
-  # contact: true reveals contact details (own org or accepted connection)
+  # contact: true reveals OID and member list (own org or accepted connection)
   def self.call(org, contact: false)
     base = {
       id: org.id, name: org.name, country: org.country, website: org.website,
@@ -8,7 +8,7 @@ class OrganizationSerializer
     }
     if contact
       base[:oid] = org.oid
-      base[:members] = org.users.map { |u| { name: u.name, email: u.email } }
+      base[:members] = org.members.map { |u| { id: u.id, name: u.name, email: u.email } }
     end
     base
   end

@@ -24,20 +24,21 @@ export interface AlumniPinProject {
   starts_on?: string;
 }
 
-/** A synthetic pin derived from a project's venue country */
+export interface VenueParticipant {
+  id: number;
+  name: string;
+  organization: AlumniPin["organization"];
+  is_me: boolean;
+  /** Projects this participant attended at this venue */
+  projects: AlumniPinProject[];
+}
+
+/** One pin per distinct venue country — aggregates all participants across all users */
 export interface VenuePin {
-  /** Unique key: `venue-{projectId}-{userId}` */
+  /** Unique key: `venue-{country}` */
   key: string;
   latitude: number;
   longitude: number;
   country: string;
-  /** All projects at this venue for this user */
-  projects: AlumniPinProject[];
-  /** The user who participated */
-  participant: {
-    id: number;
-    name: string;
-    organization: AlumniPin["organization"];
-  };
-  is_me: boolean;
+  participants: VenueParticipant[];
 }
